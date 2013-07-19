@@ -1,7 +1,7 @@
 Gem::Specification.new do |s|
   s.name = "batch_translations"
-  s.version = "0.1.3"
-  s.date = "2011-11-06"
+  s.version = "0.1.4"
+  s.date = "2013-07-19"
   s.summary = "allow saving multiple globalize2 translations in the same request"
   s.email = "sebcioz@gmail.com"
   s.homepage = "https://github.com/sebcioz/batch_translations"
@@ -11,4 +11,6 @@ Gem::Specification.new do |s|
   s.authors = ['Szymon Fiedler']
   s.files = ["batch_translations.gemspec", 'lib/batch_translations.rb'] +
     Dir.glob("lib/**/*")
+		
+	s.add_dependency 'activerecord', '>= 4.0.0'
 end
