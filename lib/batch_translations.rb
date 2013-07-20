@@ -64,3 +64,27 @@ module Globalize
     end
   end
 end
+
+# ----------------------------------------------------------------
+# ----------------------------------------------------------------
+
+module ActionController
+	class Parameters
+		# Set the languages used in the application configuration:
+		# > config.languages = [:fr, :en, :es]
+		# and call it
+		# params.permit_with_translations[:common_key1, :common_key2], :translation_key1, :translation_key2)
+		def permit_with_translations(permitted_params, *filters)
+			permitted_translations_params = []
+			
+			Rails.application.config.languages.each do |locale|
+				permitted_translations_params << {locale => filters}
+			end
+			
+			permitted_params_with_translations = permitted_params + [{translations_attributes: permitted_translations_params}]
+			
+			self.permit(permitted_params_with_translations)
+		end
+	end
+end
+
