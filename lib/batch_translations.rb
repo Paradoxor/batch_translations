@@ -1,3 +1,5 @@
+require 'pp'
+
 module ActionView
   module Helpers
     class FormBuilder
@@ -19,26 +21,82 @@ module ActionView
   end
 end
 
+# ----------------------------------------------------------------
+# ----------------------------------------------------------------
+
 module Globalize
   module ActiveRecord
     module InstanceMethods
+			def self.extract_translations_attributes(attributes)
+				attributes = attributes.symbolize_keys if attributes.respond_to?(:symbolize_keys)
+			
+				common_attributes = attributes.reject { |key, value| key == :translations_attributes }
+				translations_attributes = (attributes[:translations_attributes])? attributes[:translations_attributes].symbolize_keys : nil
+			
+				[common_attributes, translations_attributes]
+			end
+			
+			# ----------------------------------------------------------------
+			
 			def self.included(base)
 				Rails.logger.info "Globalize included"
 				
 				base.class_eval %{
+					class << self
+						alias_method :rails_create, :create
+					end
+					
+					# ----------------------------------------------------------------
+					
+					alias_method :rails_initialize, :initialize
 					alias_method :rails_update, :update
 					
-					def update(attributes)
+					# ----------------------------------------------------------------
+				
+					def self.create(attributes = {})
+						puts "create"
+						pp self.class.methods.sort
+						
+						if self.translates?
+							common_attributes, translations_attributes = Globalize::ActiveRecord::InstanceMethods.extract_translations_attributes(attributes)
+							self.rails_create(common_attributes)
+							save_translations(attributes)
+						else
+							self.rails_create(attributes)
+						end
+					end
+					
+					# ----------------------------------------------------------------
+					
+					def initialize(attributes = {})
 						if self.class.translates?
-							attributes = attributes.symbolize_keys if attributes.respond_to?(:symbolize_keys)
-						
-							self.rails_update(attributes.reject { |key, value| key == :translations_attributes })
-						
-							if attributes[:translations_attributes]
-								self.set_translations(attributes[:translations_attributes].symbolize_keys)
-							end
+							common_attributes, translations_attributes = Globalize::ActiveRecord::InstanceMethods.extract_translations_attributes(attributes)
+							self.rails_initialize(common_attributes)
+							save_translations(attributes)
+						else
+							self.rails_initialize(attributes)
+						end
+					end
+					
+					# ----------------------------------------------------------------
+					
+					def update(attributes = {})
+						if self.class.translates?
+							common_attributes, translations_attributes = Globalize::ActiveRecord::InstanceMethods.extract_translations_attributes(attributes)
+							self.rails_update(common_attributes)
+							save_translations(attributes)
 						else
 							self.rails_update(attributes)
+						end
+					end
+					
+					# ----------------------------------------------------------------
+					protected
+					# ----------------------------------------------------------------
+					
+					def save_translations(translations_attributes)
+						if translations_attributes
+							self.set_translations(translations_attributes)
 						end
 					end
 				}
