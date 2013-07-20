@@ -45,13 +45,15 @@ module Globalize
 							common_attributes, translations_attributes = Globalize::ActiveRecord::InstanceMethods.extract_translations_attributes(attributes)
 							rails_assign_attributes(common_attributes)
 							
-			        translations_attributes.keys.each do |locale|
-			          translation = translation_for(locale) ||
-			                        translations.build(:locale => locale.to_s)
+							unless translations_attributes.nil?
+				        translations_attributes.keys.each do |locale|
+				          translation = translation_for(locale) ||
+				                        translations.build(:locale => locale.to_s)
 
-			          translations_attributes[locale].each do |key, value|
-			            translation.send :"\#{key}=", value
-			          end
+				          translations_attributes[locale].each do |key, value|
+				            translation.send :"\#{key}=", value
+				          end
+								end
 							end
 						else
 							rails_assign_attributes(attributes)
