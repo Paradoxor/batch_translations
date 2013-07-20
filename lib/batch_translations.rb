@@ -1,5 +1,3 @@
-require 'pp'
-
 module ActionView
   module Helpers
     class FormBuilder
@@ -39,64 +37,24 @@ module Globalize
 			# ----------------------------------------------------------------
 			
 			def self.included(base)
-				Rails.logger.info "Globalize included"
-				
 				base.class_eval %{
-					class << self
-						alias_method :rails_create, :create
-					end
+					alias_method :rails_assign_attributes, :assign_attributes
 					
-					# ----------------------------------------------------------------
-					
-					alias_method :rails_initialize, :initialize
-					alias_method :rails_update, :update
-					
-					# ----------------------------------------------------------------
-				
-					def self.create(attributes = {})
-						puts "create"
-						pp self.class.methods.sort
-						
-						if self.translates?
-							common_attributes, translations_attributes = Globalize::ActiveRecord::InstanceMethods.extract_translations_attributes(attributes)
-							self.rails_create(common_attributes)
-							save_translations(attributes)
-						else
-							self.rails_create(attributes)
-						end
-					end
-					
-					# ----------------------------------------------------------------
-					
-					def initialize(attributes = {})
+					def assign_attributes(attributes = {})
 						if self.class.translates?
 							common_attributes, translations_attributes = Globalize::ActiveRecord::InstanceMethods.extract_translations_attributes(attributes)
-							self.rails_initialize(common_attributes)
-							save_translations(attributes)
+							rails_assign_attributes(common_attributes)
+							
+			        translations_attributes.keys.each do |locale|
+			          translation = translation_for(locale) ||
+			                        translations.build(:locale => locale.to_s)
+
+			          translations_attributes[locale].each do |key, value|
+			            translation.send :"\#{key}=", value
+			          end
+							end
 						else
-							self.rails_initialize(attributes)
-						end
-					end
-					
-					# ----------------------------------------------------------------
-					
-					def update(attributes = {})
-						if self.class.translates?
-							common_attributes, translations_attributes = Globalize::ActiveRecord::InstanceMethods.extract_translations_attributes(attributes)
-							self.rails_update(common_attributes)
-							save_translations(attributes)
-						else
-							self.rails_update(attributes)
-						end
-					end
-					
-					# ----------------------------------------------------------------
-					protected
-					# ----------------------------------------------------------------
-					
-					def save_translations(translations_attributes)
-						if translations_attributes
-							self.set_translations(translations_attributes)
+							rails_assign_attributes(attributes)
 						end
 					end
 				}
