@@ -28,10 +28,10 @@ module Globalize
   module ActiveRecord
     module InstanceMethods
       def self.extract_translations_attributes(attributes)
-        attributes = attributes.symbolize_keys if attributes.respond_to?(:symbolize_keys)
+        permitted_attributes = attributes.to_h.symbolize_keys
 
-        common_attributes = attributes.reject { |key, value| key == :translations_attributes }
-        translations_attributes = (attributes[:translations_attributes]) ? attributes[:translations_attributes].symbolize_keys : nil
+        common_attributes = permitted_attributes.reject { |key, value| key == :translations_attributes }
+        translations_attributes = (permitted_attributes[:translations_attributes]) ? permitted_attributes[:translations_attributes].symbolize_keys : nil
 
         [common_attributes, translations_attributes]
       end
@@ -73,17 +73,17 @@ end
 module ActionController
   class Parameters
     # Set the languages used in the application configuration:
-    # > config.languages = [:fr, :en, :es]
-    # and call it
-    # params.permit_with_translations[:common_key1, :common_key2], :translation_key1, :translation_key2)
-    def permit_with_translations(permitted_params, *filters)
+    # > config.i18n.available_locales
+    # and call like
+    # params.require(:post).permit_with_translations(:title, :body)
+    def permit_with_translations(*filters)
       permitted_translations_params = []
 
-      Rails.application.config.languages.each do |locale|
+      I18n.available_locales.each do |locale|
         permitted_translations_params << {locale => filters}
       end
 
-      permitted_params_with_translations = permitted_params + [{translations_attributes: permitted_translations_params}]
+      permitted_params_with_translations = [{translations_attributes: permitted_translations_params}]
 
       self.permit(permitted_params_with_translations)
     end

@@ -31,7 +31,7 @@ Or install it yourself as:
 $ gem install batch_translations
 ```
 
-## Model configuration
+## Model
 
 In model, which uses Globalize after definition
 
@@ -50,18 +50,11 @@ so it'll look like
 ```ruby
   class Post < ActiveRecord::Base
     translates :title, :teaser, :body
-
     accepts_nested_attributes_for :translations
-    class Translation
-      attr_accessible :locale # mandatory to read a locale version that doesn't exist yet
-      attr_accessible :title, :teaser, :body, :locale, as: :admin
-    end
   end
 ```
 
-Is necessary for it work properly.
-
-## Usage
+## View
 
 Now, use it in your view file, like as below:
 
@@ -97,6 +90,16 @@ Now, use it in your view file, like as below:
     <%= f.submit "Save" %>
   <% end %>
 ```
+
+## Controller
+
+Permit simplified batch assignment using the permit_with_translations helper
+
+```ruby
+params.require(:post).permit_with_translations(:title, :body)
+```
+
+It defaults to using the locales defined by I18n.available_locales
 
 ## Contributing
 
