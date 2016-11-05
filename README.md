@@ -18,7 +18,7 @@ There are no tests.
 Add this line to your application's Gemfile:
 
 ```ruby
-gem 'batch_translations'
+gem 'batch_translations', git: 'https://github.com/trammel/batch_translations'
 ```
 
 And then execute:
