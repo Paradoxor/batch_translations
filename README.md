@@ -1,26 +1,53 @@
-= Batch translation
+# BatchTranslations
 
 Helper that renders globalize_translations fields on a per-locale basis, so you can use them
 separately in the same form and still saving them all at once in the same request.
 
-== Installation
+This is forked from https://github.com/wooandoo/batch_translations
+and based on work from Szymon Fiedler & Jose Alvarez Rilla
 
-Batch translation supports Globalize 3 and is not backward compatible.
+## Changes
 
-  rails plugin install git://github.com/fidel/batch_translations.git
+ * converted into a gem.
+ * fixed to work with rails-bootstrap-forms
 
-== Model configuration
+There are no tests.
+
+## Installation
+
+Add this line to your application's Gemfile:
+
+```ruby
+gem 'batch_translations'
+```
+
+And then execute:
+```bash
+$ bundle
+```
+
+Or install it yourself as:
+```bash
+$ gem install batch_translations
+```
+
+## Model configuration
 
 In model, which uses Globalize after definition
 
-  translates :title, :teaser, :body # or any other fields, which you translate
+```ruby
+translates :title, :teaser, :body # or any other fields, which you translate
+```
 
 place
 
-  accepts_nested_attributes_for :translations
+```ruby
+accepts_nested_attributes_for :translations
+```
 
 so it'll look like
 
+```ruby
   class Post < ActiveRecord::Base
     translates :title, :teaser, :body
 
@@ -30,13 +57,15 @@ so it'll look like
       attr_accessible :title, :teaser, :body, :locale, as: :admin
     end
   end
+```
 
-It's necessary for proper working.
+Is necessary for it work properly.
 
-== Usage
+## Usage
 
-Now, use it in your view file, like in these below:
+Now, use it in your view file, like as below:
 
+```html+erb
   <h1>Editing post</h1>
 
   <%= form_for(@post) do |f| %>
@@ -67,7 +96,12 @@ Now, use it in your view file, like in these below:
 
     <%= f.submit "Save" %>
   <% end %>
+```
 
-== License
+## Contributing
+
+Fork, test, pull-request.
+
+## License
 
 Copyright (c) 2010 Szymon Fiedler http://github.com/fidel, released under MIT License.
