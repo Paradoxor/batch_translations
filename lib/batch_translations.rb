@@ -75,17 +75,27 @@ module ActionController
     # Set the languages used in the application configuration:
     # > config.i18n.available_locales
     # and call like
-    # params.require(:post).permit_with_translations(:title, :body)
-    def permit_with_translations(*filters)
-      permitted_translations_params = []
+    # params.require(:post).permit_with_translations([:author_id], :title, :body)
+    # params.require(:post).permit_with_translations([:untranslated_param_1, :untranslated_param_2], :translated_param_1, :translated_param_2)
+    def permit_with_translations(common, *filters)
+      translated_params = []
+      untranslated_params = []
 
       I18n.available_locales.each do |locale|
-        permitted_translations_params << {locale => filters}
+        translated_params << {locale => filters}
       end
 
-      permitted_params_with_translations = [{translations_attributes: permitted_translations_params}]
+      permitted_params_with_translations = {translations_attributes: translated_params}
 
-      self.permit(permitted_params_with_translations)
+      common.each do |param|
+        if param.is_a?(Hash)
+          permitted_params_with_translations.merge!(param)
+        else
+          untranslated_params << param
+        end
+      end
+
+      self.permit(untranslated_params, permitted_params_with_translations)
     end
   end
 end
